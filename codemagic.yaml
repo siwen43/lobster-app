@@ -7,10 +7,13 @@ workflows:
       xcode: 16.0
       vars:
         VUE_APP_BASE_API: http://111.170.16.253:8089
-        VUE_APP_PUBLIC_PATH: ""
+        VUE_APP_PUBLIC_PATH: "./"
         VUE_APP_ROUTER_MODE: hash
         VUE_APP_NO_GZIP: "true"
         VUE_APP_TITLE: 龙虾助手
+    cache:
+      cache_paths:
+        - node_modules
     scripts:
       - name: 安装依赖
         script: npm install
@@ -18,9 +21,20 @@ workflows:
         script: npx vue-cli-service build --mode capacitor
       - name: 同步 iOS
         script: npx cap sync ios
+      - name: 构建 iOS
+        script: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath $CM_BUILD_DIR/build/ios/ipa/App.xcarchive \
+            archive CODE_SIGN_STYLE=Automatic
+      - name: 导出 IPA
+        script: |
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/build/ios/ipa/App.xcarchive \
+            -exportOptionsPlist ios/App/exportOptions.plist \
+            -exportPath $CM_BUILD_DIR/build/ios/ipa
     artifacts:
       - build/ios/ipa/*.ipa
-    publishing:
-      email:
-        recipients:
-          - your-email@example.com
