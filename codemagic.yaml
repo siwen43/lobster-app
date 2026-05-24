@@ -1,0 +1,26 @@
+workflows:
+  ios-build:
+    name: 龙虾助手 iOS
+    max_build_duration: 30
+    environment:
+      node: 20.11.0
+      xcode: 16.0
+      vars:
+        VUE_APP_BASE_API: http://111.170.16.253:8089
+        VUE_APP_PUBLIC_PATH: ""
+        VUE_APP_ROUTER_MODE: hash
+        VUE_APP_NO_GZIP: "true"
+        VUE_APP_TITLE: 龙虾助手
+    scripts:
+      - name: 安装依赖
+        script: npm install
+      - name: 构建前端
+        script: npx vue-cli-service build --mode capacitor
+      - name: 同步 iOS
+        script: npx cap sync ios
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
